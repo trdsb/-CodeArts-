@@ -5,7 +5,9 @@
 ## 一、实验目的
 
 1.掌握OpenHarmony的任务创建；
+
 2.掌握OpenHarmony的任务入口函数构建；
+
 3.掌握OpenHarmony的任务运行。
 
 ## 二、实验环境
@@ -15,14 +17,24 @@
 ## 三、实验内容
 
 1.学习OpenHarmony的任务创建；
+
 2.学习OpenHarmony的任务入口函数构建；
+
 3.学习OpenHarmony的任务运行。
 
 ## 四、实验原理
 
 ### 1. OpenHarmony任务
 
-每一个任务都含有一个任务控制块（TCB）。TCB包含了任务上下文栈指针（stack pointer）、任务状态、任务优先级、任务ID、任务名、任务栈大小等信息。TCB可以反映出每个任务运行情况。任务初始化时需要通过结构体TSK_INIT_PARAM_S提供一些任务所需的信息。其中，成员pfnTaskEntry是任务入口函数，这样在任务第一次启动进入运行态时，将会执行任务入口函数。因此本实验中可定义一个函数HelloWorldEntry执行输出"Hello World！"并把该函数作为任务的入口函数。任务入口函数如代码示例3.1所示。
+每一个任务都含有一个任务控制块（TCB）。
+TCB包含了任务上下文栈指针（stack pointer）、任务状态、任务优先级、任务ID、任务名、任务栈大小等信息。
+
+TCB可以反映出每个任务运行情况。
+
+任务是抢占式调度机制，同时支持时间片轮转调度方式。LiteOS-m内核的任务一共有32个优先级(0-31)，最高优先级为0，最低优先级为31。
+
+任务入口函数如代码示例3.1所示。
+
 代码示例3.1  任务入口函数HelloWorldEntry()
 
 ```c
@@ -35,18 +47,26 @@ VOID HelloWorldEntry(VOID)
 }
 ```
 
-任务是抢占式调度机制，同时支持时间片轮转调度方式。LiteOS-m内核的任务一共有32个优先级(0-31)，最高优先级为0，最低优先级为31。
-
 ### 2. OpenHarmony任务定义创建
 
-首先定义TSK_INIT_PARAM_S类型的结构体stTask来完成任务的初始化，设置任务入口函数、堆栈大小、任务名称以及优先级。然后调用函数LOS_TaskCreate()创建任务，其原型如下：
+首先定义TSK_INIT_PARAM_S类型的结构体stTask来完成任务的初始化，设置任务入口函数、堆栈大小、任务名称以及优先级。
+
+任务初始化时需要通过结构体TSK_INIT_PARAM_S提供一些任务所需的信息。
+
+其中，成员pfnTaskEntry是任务入口函数，这样在任务第一次启动进入运行态时，将会执行任务入口函数。
+
+因此本实验中可定义一个函数HelloWorldEntry执行输出"Hello World！"并把该函数作为任务的入口函数。
+
+函数LOS_TaskCreate()创建任务，其原型如下：
 
 ```c
 UINT32 LOS_TaskCreate(UINT32 *taskID, TSK_INIT_PARAM_S *taskInitParam);
 ```
 
 参数*taskID带回任务的ID，参数*taskInitParam传入任务的初始化信息，函数返回值代表创建是否成功。
+
 创建过程如代码示例3.2。
+
 代码示例3.2  任务创建
 
 ```c
@@ -69,7 +89,14 @@ VOID TaskHelloWorld(VOID)
 
 ### 3. OpenHarmony任务运行
 
-任务创建完成后，需要将任务TaskHelloWorld放到用户代码的main()函数中，然后调用LOS_Start()启动任务的调度，但是在此之前需要先调用 LOS_KernelInit()初始化用户代码的内核空间。main()函数如代码示例3.3。
+任务创建完成后，需要将任务TaskHelloWorld放到用户代码的main()函数中，
+
+然后调用LOS_Start()启动任务的调度，
+
+但是在此之前需要先调用 LOS_KernelInit()初始化用户代码的内核空间。
+
+main()函数如代码示例3.3。
+
 代码示例3.3  main()函数中运行任务
 
 ```c
@@ -104,12 +131,16 @@ int main(void)
 
 #### 2.1 数据结构
 
-分析任务初始化参数结构体TSK_INIT_PARAM_S和任务控制块TCB结构体数据结构的作用及其每个成员的意义。
+分析任务初始化参数结构体TSK_INIT_PARAM_S;
+
+分析任务控制块LosTaskCB结构体的作用及其每个成员的意义。
 
 #### 2.2 任务状态
 
 分析LiteOS-m每个任务状态的意义，给出每个状态转换的条件及其转换后的状态。
+
 LiteOS-m的任务状态定义如代码引用3.3所示。
+
 代码引用3.3  任务状态（los_task.h）
 
 ```c
@@ -189,6 +220,7 @@ LiteOS-m的任务状态定义如代码引用3.3所示。
 #### 2.3  全局变量
 
 LiteOS-m的任务全局变量定义如代码引用3.4所示。说明全局变量的作用及引用这些变量的主要相关函数。
+
 代码引用3.4  任务相关全局变量（los_task.c）
 
 ```c
@@ -200,7 +232,7 @@ LITE_OS_SEC_BSS  UINT32                              g_idleTaskI
 LITE_OS_SEC_BSS  UINT32                              g_swtmrTaskID;
 LITE_OS_SEC_DATA_INIT LOS_DL_LIST                    g_losFreeTask;
 LITE_OS_SEC_DATA_INIT LOS_DL_LIST                    g_taskRecyleList;
-LITE_OS_SEC_BSS  BOOL                                 g_taskScheduled = FALSE;
+LITE_OS_SEC_BSS  BOOL                                g_taskScheduled = FALSE;
 ```
 
 #### 2.4 函数
@@ -261,15 +293,15 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsTaskInit(VOID)
 
 // Ignore the return code when matching CSEC rule 6.6(4).
 
-⑤　(VOID)memset_s((VOID *)(&g_losTask), sizeof(g_losTask), 0, sizeof(g_losTask));
+⑤   (VOID)memset_s((VOID *)(&g_losTask), sizeof(g_losTask), 0, sizeof(g_losTask));
 
-⑥　g_losTask.runTask = &g_taskCBArray[g_taskMaxNum];
+⑥   g_losTask.runTask = &g_taskCBArray[g_taskMaxNum];
     g_losTask.runTask->taskID = index;
     g_losTask.runTask->taskStatus = (OS_TASK_STATUS_UNUSED | OS_TASK_STATUS_RUNNING);
     g_losTask.runTask->priority = OS_TASK_PRIORITY_LOWEST + 1;
 
 
-⑦　g_idleTaskID = OS_INVALID;
+⑦   g_idleTaskID = OS_INVALID;
     return OsSchedInit();
 }
 ```
@@ -303,7 +335,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 OsNewTaskInit(LosTaskCB *taskCB, TSK_INIT_PARAM_S *
 
     if (taskInitParam->uwResved & LOS_TASK_ATTR_JOINABLE) {
         taskCB->taskStatus |= OS_TASK_FLAG_JOINABLE;
-⑱　    LOS_ListInit(&taskCB->joinList);     
+⑱       LOS_ListInit(&taskCB->joinList);     
     }
     return LOS_OK;
 }
@@ -334,13 +366,13 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskCreateOnly(UINT32 *taskID, TSK_INIT_PARAM_S
     }
 
 
-①　retVal = OsTaskInitParamCheck(taskInitParam);
+①   retVal = OsTaskInitParamCheck(taskInitParam);
     if (retVal != LOS_OK) {
         return retVal;
     }
 
 
-②　OsRecyleFinishedTask();
+②   OsRecyleFinishedTask();
 
     intSave = LOS_IntLock();
     if (LOS_ListEmpty(&g_losFreeTask)) {
@@ -349,9 +381,9 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskCreateOnly(UINT32 *taskID, TSK_INIT_PARAM_S
     }
 
 
-③　taskCB = OS_TCB_FROM_PENDLIST(LOS_DL_LIST_FIRST(&g_losFreeTask));
+③   taskCB = OS_TCB_FROM_PENDLIST(LOS_DL_LIST_FIRST(&g_losFreeTask));
 
-④　LOS_ListDelete(LOS_DL_LIST_FIRST(&g_losFreeTask));
+④   LOS_ListDelete(LOS_DL_LIST_FIRST(&g_losFreeTask));
 
     LOS_IntRestore(intSave);
 
@@ -371,7 +403,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskCreateOnly(UINT32 *taskID, TSK_INIT_PARAM_S
     }
 
 
-⑤　retVal = OsNewTaskInit(taskCB, taskInitParam, topOfStack);
+⑤   retVal = OsNewTaskInit(taskCB, taskInitParam, topOfStack);
     if (retVal != LOS_OK) {
         return retVal;
     }
@@ -394,6 +426,7 @@ LOS_ERREND:
 ##### 2.4.4 LOS_TaskResume ()
 
 函数LOS_TaskResume ()的实现如代码引用3.8所示。
+
 代码引用3.8  函数LOS_TaskResume ()的实现（los_task.c）
 
 ```c
@@ -439,7 +472,7 @@ if (!(taskCB->taskStatus & OS_CHECK_TASK_BLOCK)) {
 ②　   OsSchedTaskEnQueue(taskCB); 
         if (g_taskScheduled) {
             LOS_IntRestore(intSave);
-③　        LOS_Schedule(); 
+③　         LOS_Schedule(); 
             return LOS_OK;
         }
     }
@@ -456,6 +489,7 @@ LOS_ERREND:
 ##### 2.4.5 函数LOS_TaskSuspend ()
 
 函数LOS_TaskSuspend ()的实现如代码引用3.9所示。
+
 代码引用3.9  函数LOS_TaskSuspend ()的实现（los_task.c）
 
 ```c
@@ -510,7 +544,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskSuspend(UINT32 taskID)
     OsHookCall(LOS_HOOK_TYPE_MOVEDTASKTOSUSPENDEDLIST, taskCB);
     if (taskID == g_losTask.runTask->taskID) {
         LOS_IntRestore(intSave);
-③　    LOS_Schedule(); 
+③　     LOS_Schedule(); 
         return LOS_OK;
     }
 
@@ -526,6 +560,7 @@ LOS_ERREND:
 ##### 2.4.6 函数LOS_TaskDelete ()
 
 函数LOS_TaskDelete ()的实现如代码引用3.10所示。
+
 代码引用3.10  函数LOS_TaskDelete ()的实现（los_task.c）
 
 ```c
@@ -580,10 +615,10 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskID)
 ①　if (taskCB->taskStatus & OS_TASK_STATUS_RUNNING) { 
 ②　    if (!(taskCB->taskStatus & OS_TASK_STATUS_EXIT)) { 
             taskCB->taskStatus = OS_TASK_STATUS_UNUSED;
-③　        OsRunningTaskDelete(taskID, taskCB);
+③　         OsRunningTaskDelete(taskID, taskCB);
         }
         LOS_IntRestore(intSave);
-④　    LOS_Schedule(); 
+④　     LOS_Schedule(); 
         return LOS_OK;
     }
 
@@ -598,6 +633,7 @@ LITE_OS_SEC_TEXT_INIT UINT32 LOS_TaskDelete(UINT32 taskID)
 ##### 2.4.7 函数LOS_TaskYield ()
 
 函数LOS_TaskYield ()的实现如代码引用3.11所示。
+
 代码引用3.11  函数LOS_TaskYield ()的实现（los_task.c）
 
 ```c
@@ -613,10 +649,10 @@ LITE_OS_SEC_TEXT_MINOR UINT32 LOS_TaskYield(VOID)
     UINT32 intSave;
 
     intSave = LOS_IntLock();
-①　  OsSchedYield();
+①　 OsSchedYield();
 
     LOS_IntRestore(intSave);
-②　LOS_Schedule(); 
+②　 LOS_Schedule(); 
     return LOS_OK;
 }
 ```
